@@ -2,18 +2,14 @@ package ua.edu.ucu.stream;
 
 import ua.edu.ucu.function.*;
 import ua.edu.ucu.iterators.FilterIterator;
+import ua.edu.ucu.iterators.FlatMapIterator;
 import ua.edu.ucu.iterators.MainIterator;
 import ua.edu.ucu.iterators.MapIterator;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 
 public class AsIntStream implements IntStream {
     private Iterator<Integer> elementsIterator;
-
-    private AsIntStream() {
-    }
 
     private AsIntStream(Iterator<Integer> iterator) {
         elementsIterator = iterator;
@@ -23,8 +19,13 @@ public class AsIntStream implements IntStream {
         return new AsIntStream(new MainIterator(values));
     }
 
+    private void checkIfEmpty() {
+        if (!elementsIterator.hasNext()) throw new IllegalArgumentException();
+    }
+
     @Override
     public Double average() {
+        checkIfEmpty();
         int sum = 0;
         int size = 0;
         while (elementsIterator.hasNext()) {
@@ -36,10 +37,7 @@ public class AsIntStream implements IntStream {
 
     @Override
     public Integer max() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//        if (!elementsIterator.hasNext()) {
-//            throw new IllegalArgumentException();
-//        }
+        checkIfEmpty();
         int max = 0;
         while (elementsIterator.hasNext()) {
             int next = elementsIterator.next();
@@ -48,16 +46,9 @@ public class AsIntStream implements IntStream {
         return max;
     }
 
-    public static void main(String[] args) {
-        IntStream intStream = AsIntStream.of(-1, 0, 1, 2, 3);
-//        intStream.filter(x -> x > 1).forEach(System.out::println);
-        int[] res = intStream.filter(x -> x > 1).map(x -> x * 2).toArray();
-        System.out.println(Arrays.toString(res));
-    }
-
     @Override
     public Integer min() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        checkIfEmpty();
         int min = Integer.MAX_VALUE;
         while (elementsIterator.hasNext()) {
             int next = elementsIterator.next();
@@ -68,7 +59,6 @@ public class AsIntStream implements IntStream {
 
     @Override
     public long count() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         long size = 0;
         while (elementsIterator.hasNext()) {
             size++;
@@ -79,50 +69,44 @@ public class AsIntStream implements IntStream {
 
     @Override
     public Integer sum() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        int sum = 0;
-        while (elementsIterator.hasNext()) {
-            sum += elementsIterator.next();
-        }
-        return sum;
+        checkIfEmpty();
+        return reduce(0, (sum, x) -> sum += x);
     }
 
     @Override
     public IntStream filter(IntPredicate predicate) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         return new AsIntStream(new FilterIterator(elementsIterator, predicate));
     }
 
     @Override
     public void forEach(IntConsumer action) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         for (Iterator<Integer> it = elementsIterator; it.hasNext(); ) {
             Integer el = it.next();
-            System.out.println("element: " + el);
             action.accept(el);
         }
     }
 
     @Override
     public IntStream map(IntUnaryOperator mapper) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         return new AsIntStream(new MapIterator(elementsIterator, mapper));
     }
 
     @Override
     public IntStream flatMap(IntToIntStreamFunction func) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new AsIntStream(new FlatMapIterator(elementsIterator, func));
     }
 
     @Override
     public int reduce(int identity, IntBinaryOperator op) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for (Iterator<Integer> it = elementsIterator; it.hasNext(); ) {
+            Integer el = it.next();
+            identity = op.apply(identity, el);
+        }
+        return identity;
     }
 
     @Override
     public int[] toArray() {
-//        System.out.println("To array");
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         ArrayList<Integer> arrayList = new ArrayList<>();
         for (Iterator<Integer> it = elementsIterator; it.hasNext(); ) {
             Integer value = it.next();
@@ -132,8 +116,7 @@ public class AsIntStream implements IntStream {
         int i = 0;
         for (Integer el: arrayList) {
             result[i++] = el;
-        };
+        }
         return result;
     }
-
 }

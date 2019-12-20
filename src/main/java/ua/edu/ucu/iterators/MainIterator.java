@@ -25,10 +25,4 @@ public class MainIterator implements Iterator<Integer> {
         return (Integer) elements.get(i++);
     }
 
-//    public static void main(String[] args) {
-//        MainIterator iter = new MainIterator(6,9,2);
-//        System.out.println(iter.next());
-//        System.out.println(iter.next());
-//        System.out.println(iter.next());
-//    }
 }

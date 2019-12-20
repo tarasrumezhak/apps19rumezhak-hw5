@@ -54,4 +54,12 @@ public class AsIntStreamTest {
         int[] result = intStream.toArray();
         assertArrayEquals(expResult, result);
     }
+
+    @Test
+    public void testReduce() {
+        int expResult = 216;
+        IntStream intStream = AsIntStream.of(1, 8, 9, 3);
+        int result = intStream.reduce(1, (mult, x) -> mult *= x);
+        assertEquals(expResult, result);
+    }
 }
